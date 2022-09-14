@@ -1264,8 +1264,471 @@ Uncaught TypeError: this.myMethod is not a function
 
 <img src="面试题总结_VUE部分.assets/image-20220908163103509.png" alt="image-20220908163103509" style="zoom:50%;" />
 
+## Vue子组件和父组件执行顺序
+
+父组件解析或触发在子组件之前，但在处理过程中，子组件处理完毕后才会回到父组件继续当前事务
+
+**加载渲染过程：** 
+
+**(父组件挂载需要用到子组件)**
+
+1.父组件 beforeCreate ----> 父组件 created  ----> 父组件 beforeMount 
+
+2.子组件 beforeCreate ----> 子组件 created ----> 子组件 beforeMount ----> 子组件 mounted 
+
+3.父组件 mounted 
+
+**更新过程：** 
+
+1.父组件 beforeUpdate 
+
+2.子组件 beforeUpdate  ----> 子组件 updated 
+
+3.父组件 updated 
+
+**销毁过程：** 
+
+1.父组件 beforeDestroy 
+
+2.子组件 beforeDestroy  ----> 子组件 destroyed 
+
+3.父组件 destoryed
+
+## created和mounted的区别
+
+**created:在模板渲染成 html 前调用**，即通常初始化某些属性值，然 后再渲染成视图。
+
+ **mounted:在模板渲染成 html 后调用**，通常是初始化页面完成后，再 对 html 的 dom 节点进行一些需要的操作。
+
+## 一般在哪个生命周期请求异步数据
+
+**created \ beforeMount \ mounted**
+
+以上三个钩子中**data皆可用**，可以支持服务端返回的数据进行赋值
+
+**推荐在created进行请求**
+
+- 能更快获取到服务端数据，减少页面加载时间，用户体验更好；
+-  SSR 不支持 beforeMount 、mounted 钩子函数，放在 created 中有 助于一致性
+
+## keep-alive生命周期
+
+keep-alive 是 Vue 提供的一个内置组件，用来对组件进行缓存—— 在**组件切换过程中将状态保留在内存中，防止重复渲染 DOM**
+
+若一个组件包裹了keep-alive则会多出两个生命周期：
+
+**deactivated、activated。**
+
+同时，**beforeDestroy 和 destroyed 就 不会再被触发了，因为组件不会被真正销毁**
+
+- 当组件被切换，会被缓存到内存中、触发 deactivated 生命周期； 
+
+- 当组件被切回来时，再去缓存里找这个组件、触发 activated 钩子函数
+
+## 路由的hash模式
+
+- **hash模式**
+
+开发中的默认模式，它的 URL 带着一个#，例如： http://www.abc.com/#/vue，它的 hash 值就是#/vue
+
+**特点：**
+
+hash会**出现在URL里面，但是不会出现在HTTP请求**中，对后端完全没有影响。所以**改变 hash 值，不会重新加载页面。**
+
+这种模 式的浏览器支持度很好，**低版本的 IE 浏览器也支持这种模式**。
+
+hash 路由被称为是前端路由，已经成为 SPA（单页面应用）的标配。
+
+**原理：haschange事件**
+
+当 URL 的片段标识符更改时，将触发**hashchange**事件 (跟在＃符号后面的 URL 部分，包括＃符号)
+
+```js
+// http://www.abc.com/#/react 跳转到
+// http://www.abc.com/#/vue
+window.onhaschange=function(event){
+console.log(event.oldURL,event.newURL)
+let hash=location.hash.slice(1)//vue
+}
+//或者
+window.addEventListener('hashchange', callback)
+```
+
+**好处**
+
+在页面的 hash 值发生变化时， 无需向后端发起请求，**window 就可以监听事件的改变**
+
+除此之外，**hash 值变化其对应的 URL 都会被浏览器记录下来**，这样浏览器就能实现页面的前进和后退。虽然是没有请求后端服务器，但是页面的 hash 值和对应的 URL 关联起来
+
+## 路由的history模式
+
+- **history模式**
+
+history 模式的 URL 中没有#，它使用的是**传统的路由分发模式**，即用户在输入一个 URL 时，服务器会接收这个请求，并解析这个 URL，然后做出相应的逻辑处理
+
+**特点**
+
+比如： http://abc.com/user/id。相比 hash 模式**更加好看**。
+
+但是，history 模式**需要后台配置支持**。**如果后台没有正确配置，访问时会返回 404**
+
+**API：**
+
+- 修改历史状态：HTML5 History Interface 中 新 增 的 **pushState() 和 replaceState()** 方法，改变浏览器历史记录而不更新页面
+
+```js
+history.pushState() 方法向当前浏览器会话的历史堆栈中添加一个状态（state）
+replaceState()方法使用`state objects`, `title`,和 `URL` 作为参数， 修改当前历史记录实体
+```
+
+！！！调用 `history.pushState()` 或者 `history.replaceState()` 不会触发 `popstate` 事件。
+
+！！！`popstate` 事件只会在浏览器某些行为下触发，比如点击后退按钮（或者在 JavaScript 中调用 `history.back()` 方法）。即，在同一文档的两个历史记录条目之间导航会触发该事件。
+
+**示例**
+
+假设 `http://mozilla.org/foo.html` 页面下执行
+
+```js
+var stateObj = { foo: "bar" };
+history.pushState(stateObj, "", "bar.html");
+//添加一个状态,此时改变地址栏url为：http://mozilla.org/bar.html
+```
+
+不会加载bar.html
+
+然后执行
+
+```js
+var stateObj = { foo: "111" };
+history.replaceState(stateObj, "", "bar2.html");
+//覆盖了原先的stateobj,且地址改变：http://mozilla.org/bar2.html
+```
+
+不会加载 `bar2.html` 页面，甚至不会检查 bar2.html 是否存在
+
+
+
+- 切换历史状态
+
+包括 **forward()、back()、go()**三个方法，对应浏 览器的前进，后退，跳转操作
+
+虽然 history 模式丢弃了丑陋的#。但是，它也有自己的缺点，就是 在**刷新页面的时候，如果没有相应的路由或资源，就会刷出 404 来**。 如果想要切换到 history 模式，就要进行以下配置（后端也要进行配 置）
+
+![image-20220912180513488](面试题总结_VUE部分.assets/image-20220912180513488.png)
+
+## hash模式和history模式的区别
+
+- pushState() 设置的新 URL 可以是与**当前 URL 同源的任意 URL**；而 hash 只可修改 # 后面的部分，因此**只能设置与当前 URL 同文档的 URL**
+- pushState() 设置的**新 URL 可以与当前 URL 一模一样**，这样也会把 记录添加到栈中；而 hash 设置的新值**必须与原来不一样才会触发**动 作将记录添加到栈中
+- pushState() 通过 **stateObject 参数可以添加任意类型的数据**到记 录中；而 **hash 只可添加短字符串**
+- pushState() 可额外设置 title 属性供后续使用
+- hash 模式下，仅 **hash 符号之前的 url 会被包含在请求**中；history 模式下， **前端的 url 必须和实际向后端发起请求的 url 一致**，如果没有对用的 路由处理，将返回 404
+
+## vue-router跳转和location.href跳转有什么区别
+
+- 使用 location.href= /url 来跳转，简单方便，但是刷新了页面；
+- 使用 history.pushState( /url ) ，无刷新页面，静态跳转
+- router.push( /url ) 来跳转，使用了 diff 算法，实现了按需加载，减少dom的消耗，其本质还是利用了history.pushState()
+
+## 什么是prop逐级穿透
+
+需要从父组件向子组件传递数据时，会使用 [props](https://cn.vuejs.org/guide/components/props.html)。
+
+但是如果在**多层级嵌套的组件中**，某个深层的子组件需要一个**较远的祖先组件中的部分数据**，在props传递的过程中形成了一颗巨大的组件props树。
+
+![Prop 逐级透传的过程图示](面试题总结_VUE部分.assets/prop-drilling.11201220.png)
+
+ `<Footer>` 组件可能根本不关心这些 props，但为了使 `<DeepChild>` 能访问到它们，仍然需要定义并向下传递。
+
+如果组件链路非常长，可能会影响到更多这条路上的组件。这一问题被称为**“prop 逐级透传”**，显然是我们希望尽量避免的情况。
+
+**解决：provide/inject**
+
+`provide`作为**依赖提供者**。任何后代的组件树，无论层级有多深，都可以通过`inject`**注入**由父组件提供给整条链路的依赖。
+
+![Provide/inject 模式](面试题总结_VUE部分.assets/provide-inject.3e0505e4.png)
+
+## vue状态管理模式
+
+- **state**，驱动应用的数据源；
+- **view**，以声明方式将 **state** 映射到视图；
+- **actions**，响应在 **view** 上的用户输入导致的状态变化。
+
+以下是一个表示“单向数据流”理念的简单示意：
+
+<img src="面试题总结_VUE部分.assets/flow.png" alt="img" style="zoom: 33%;" />
+
+## Vuex原理
+
+**官方的一段话**
+
+Vuex 是一个专为 Vue.js 应用程序开发的**状态管理模式**。
+
+它采用**集中式存储**管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化（**vuex的应用核心就是srore仓库**）
+
+通俗的理解就是把组件的共享状态抽取出来，以一个全局单例模式管理
+
+store是一个包含**多种state状态的响应式容器**，若 store 中的state状态发生变化，那么相应的组件也会相应地得 到高效更新
+
+<img src="面试题总结_VUE部分.assets/vuex.png" alt="vuex" style="zoom: 80%;" />
+
+**应用流程：**
+
+- 组件会触发（dispatch）一些事件或 动作，也就是图中的 Actions
+- 在 vuex 中，数据是集中管理的，不能直接去更改数据，所以会把这个动作提 交（Commit）到 Mutations 中;
+- Mutations 根据action去相应改变（Mutate）State 中的数据; 
+- State 中的数据被改变之后，就会重新渲染（Render）到 组件中，组件展示更新后的数据，完成一个流程
+
+**各个模块核心功能：**
+
+**Vue Components∶ Vue 组件。**HTML 页面上，负责接收用户操作等交 互行为，执行 dispatch 方法触发对应 action 进行回应。 
+
+- **dispatch∶操作行为触发方法，**是唯一能执行 action 的方法。 
+
+**actions∶ 操作行为处理模块。**
+
+- 负责处理组件dispatch的 所有交互行为。包含同步/异步操作，支持多个同名方法，按照注册 的顺序依次触发。
+- **向后台 API 请求的操作**，包括 触发其他 action 以及**提交 mutation** 的操作。
+- 提供 Promise 的封装，以支持 action 的**链式触发**。
+
+- **commit∶状态改变提交操作方法**。对 mutation 进行提交，是唯一能 执行 mutation 的方法。
+
+**mutations∶状态改变操作方法。**
+
+- 是 Vuex 修改 state 的唯一推荐方法， 其他修改方式在严格模式下将会报错。
+- 该方法**只能进行同步操作**，且 **方法名只能全局唯一**。
+  - 如果是异步的则无法跟踪状态的实时改变
+
+**state∶ 页面状态管理容器对象。**集中存储组件中需要共享的data，**全局唯一**，以进行统一的状态管理。利用 Vue 的细粒度数据响应机制来进行 高效的状态更新。 
+
+**getters∶ state 对象读取方法**（可以认为是 store 的计算属性）。就像computed一样，getter 的返回值**会根据它的依赖被缓存起来**，且只有当它的**依赖值发生了改变才会被重新计算。**
+
+**modules：store模块化**
+
+- 当应用较为复杂，需要**共享的数据较多时**，state对象以及store对象都会变得很**臃肿，不利于代码维护**。
+- 将store分割为不同模块，**每个模块拥有自己的state、mutation、action、getter并且可以嵌套子模块**。使数据管理起来更加结构清晰，方便管理。
+
+**home/index.js**
+
+```js
+//home模块小仓库
+const state = {}
+const mutations = {}
+const actions = {};
+const getters = {}
+export default {
+    state,
+    mutations,
+    actions,
+    getters
+}
+```
+
+然后再在`store/index.js`中汇总聚合各个小仓库
+
+```js
+import home from './home'
+import search from './search'
+//对外暴露一个Store类的实例
+export default new Vuex.Store({
+    modules: {
+        home,
+        search
+    }
+})
+```
+
+## vuex和localStorge的区别
+
+- vuex存储在内存中（**各种格式数据**）
+- localStorge存储在本地（**以键值对方式存储，只支持字符串类型**）
+  - 存储对象需要 JSON 的 stringify 和 parse 方法进行处理。 
+
+！！！**读取内存比读取硬盘速度要**
+
+**应用场景**
+
+- Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。集中式管理组件共享状态，并以相应的规则保证状态以一 种可预测的方式发生变化。**vuex 用于组件之间的传值**
+
+- localstorage 是本地存储，是将数据存储到浏览器的方法，一般是 在**跨页面传递数据时使用**
+
+！！！**vuex实现数据的响应式，localStorge不能**
+
+**持久化**
+
+刷新页面vuex存储的数据会丢失，localStorge不会
+
+## vuex和单纯的全局对象有什么区别
+
+1. vuex的状态存储是**响应式的**，store中的状态变化，那么对应的组件也会相应的更新
+2. **不能直接改变**store中的state，state改变的唯一途径是提交commit到mutation（这样可以方便地跟踪每一个状态 的变化，从而能够实现一些工具帮助更好地了解我们的应用）
+
+## 为什么vuex的mutation不能做异步操作
+
+vuex状态更新的唯一推荐途径是mutation
+
+每个mutation执行完成对应一个新的状态变更，这样做的目的是为了**更加方便地跟踪每一个状态的变化。**
+
+所以开发者工具devtools就可以**存储快照，实现time-travel**
+
+反之，如果mutation是**异步操作，那么就无法知道状态更新的具体时间节点，无法进行状态追踪**
+
+## defineProperty和proxy的区别
+
+vue2初始化遍历data，使用Object.defineProperty 把这些属性全部转为 getter/setter
+
+！！！Object.defineProperty 是 ES5 中一个**无法 shim 的特性**，这也就 是 Vue 不支持 IE8 以及更低版本浏览器的原因。
+
+- defineProperty
+
+1.**后期添加或删除对象的属性，vue2无法检测**。因为添加或删除的对象 没 有 在 初 始 化 进 行 响 应 式 处 理 ， 只 能 通 过 $set 来 调 用 Object.defineProperty()处理或一些经过包裹的数组方法
+
+2.**无法监控数组下标和数组长度**，因为vue2出于对性能的考量没有对数组做依赖收集
+
+
+
+Vue3 使用 Proxy 来监控数据的变化。Proxy 是 ES6 中提供的功能， 其作用为：用于定义基本操作的自定义行为（如属性查找，赋值，枚举，函数调用等）
+
+- proxy
+
+1.**Proxy 直接代理整个对象而非对象属性**，这样只需做一层代理就可 以监听同级结构下的所有属性变化，包括新增属性和删除属性。 
+
+2.Proxy 可以监听数组的变化
+
+## vue3为什么要用proxy
+
+vue2中defineProperty会改变原始数据，而proxy是对象的虚拟表示，作为对象的代理
+
+```js
+new Proxy(target,handler)
+```
+
+- `target` 被代理的对象，它可以是任何类型的对象，包括内置的数组，函数甚至是另一个代理对象。
+- `handler` 被代理对象上的自定义行为
+
+```
+handler.get 拦截器
+handler.set 捕获器
+```
+
+这些处理器可在访问或修改原始对象上的属性时进行拦截，实现完全的代理
+
+**proxy优点**
+
+- 不需用使用 Vue.$set 或 Vue.$delete 触发响应式。 
+
+- 全方位的数组变化检测，消除了 Vue2 无效的边界情况。 
+- 支持 Map，Set，WeakMap 和 WeakSet。
+
+## 虚拟dom解析过程
+
+1. 对将要插入文档中的dom树结构进行分析，**使用js对象将其表示出来并保存该对象树**
+2. 页面的状态发生改变，需要对页面的 DOM 的结构进行调整的时候， 首先**根据变更的状态，重新构建起一棵对象树**
+3. **新旧对象树进行比较，记录两棵树的差异**
+4. 最后将记录的**有差异的地方应用到真实dom树**（即更新视图）
+
+## vue中key的作用
+
+1. **v-if使用key**（标识一个独立元素）
+
+使用 v-if 来 实现元素切换的时候，如果切换前后含有相同类型的元素，那么这个元素就会被复用，防止不需要的复用可以为元素标识key，使用key的元素不会被复用
+
+2. **v-for使用key**（高效的更新渲染虚拟 DOM）
+
+v-for更新已渲染过的元素列 表时，它**默认使用“就地复用”的策略**
+
+如果数据项的顺序发生了改 变，Vue **不会移动 DOM 元素来匹配数据项**的顺序，而是**简单复用此 处的每个元素**
+
+为每个列表项提供一个 key 值，以便 Vue 来跟踪元素的身份，从而高效的实现复用。这个时候 key 的作用是为 了**高效的更新渲染虚拟 DOM**
+
+**原因：**key 是为 Vue 中 **vnode 的唯一标记**，通过这个 key，diff 操作可 以**更准确、更快速**
+
+- 更准确：因为带 key 就不是就地复用了，在 sameNode 函数 a.key === b.key 对比中可以避免就地复用的情况。所以会更加准确。
+
+- 更快速：利用 **key 的唯一性生成 map 对象来获取对应节点**，比遍历 方式更快速
+
+## diff算法原理
+
+林三心：https://juejin.cn/post/6994959998283907102#comment
+
+**Diff算法是一种对比算法**。对比新旧**虚拟dom中的差异节点**，找出这个`虚拟节点`，并只更新这个虚拟节点所对应的`真实节点`，而不用更新其他部分，实现`精准`地更新真实DOM，进而`提高效率`。
+
+- **同层对比**
+
+<img src="面试题总结_VUE部分.assets/5ca3d338e5a445ab80e40042c50ac79atplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp" alt="截屏2021-08-08 上午11.32.47.png" style="zoom: 67%;" />
+
+**对比流程：**
+
+当数据改变时，会触发`setter`，并且通过`Dep.notify`去通知所有`订阅者Watcher`，订阅者们就会调用`patch方法`，给真实DOM打补丁，更新相应的视图
+
+<img src="面试题总结_VUE部分.assets/1db54647698e4c76b6fc38a02067ad72tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp" alt="截屏2021-08-08 上午11.49.38.png" style="zoom:67%;" />
+
+**patch方法**
+
+对比当前同层的虚拟节点**是否为同一种类型的标签**
+
+- 是：继续执行`patchVnode方法`进行深层比对
+- 否：没必要比对了，直接整个节点替换成`新虚拟节点`
+
+**sameNode方法**
+
+判断是否为同一类型节点
+
+```js
+function sameVnode(oldVnode, newVnode) {
+  return (
+    oldVnode.key === newVnode.key && // key值是否一样
+    oldVnode.tagName === newVnode.tagName && // 标签名是否一样
+    oldVnode.isComment === newVnode.isComment && // 是否都为注释节点
+    isDef(oldVnode.data) === isDef(newVnode.data) && // 是否都定义了data
+    sameInputType(oldVnode, newVnode) // 当标签为input时，type必须是否相同
+  )
+}
+```
+
+**patchVnode方法**
+
+**以newVnode为基准更新oldVnode**
+
+找到对应的`真实DOM`，称为`el`
+
+判断`newVnode`和`oldVnode`是否指向同一个对象，如果是，那么直接`return`
+
+如果他们都有文本节点并且不相等，那么将`el`的文本节点设置为`newVnode`的文本节点。
+
+如果`oldVnode`有子节点而`newVnode`没有，则删除`el`的子节点
+
+如果`oldVnode`没有子节点而`newVnode`有，则将`newVnode`的子节点真实化之后添加到`el`
+
+如果两者都有子节点，则执行`updateChildren`函数比较子节点，这一步很重要
+
+## 直接操作dom和虚拟dom+diff算法谁更优秀
+
+尤雨溪回答：https://www.zhihu.com/question/31809713/answer/53544875
+
+这是一个性能 vs. 可维护性的取舍，框架的意义在于为你掩盖底层的 DOM 操作，让你用更声明式的方式来描述你的目的，从而让你的代码更容易维护。
+
+**没有任何框架可以比纯手动的优化 DOM 操作更快**，因为框架的 DOM 操作层需要应对任何上层 API 可能产生的操作，它的实现必须是**普适的**。
+
+框架给你的保证是，**你在不需要手动优化的情况下，我依然可以给你提供过得去的性能**。
+
+
+
+**使用虚拟DOM算法的损耗计算：** 总损耗 = 虚拟DOM增删改+（与Diff算法效率有关）真实DOM差异增删改+**（较少的节点）排版与重绘**
+
+**直接操作真实DOM的损耗计算：** 总损耗 = 真实DOM完全增删改+**（可能较多的节点）排版与重绘**
+
+
+
+在一个大型列表所有数据都变了的情况下，重置 innerHTML 其实是一个还算合理的操作，这时候直接操作真实dom的代价与之相比又要稍好一些，所以不是绝对的
+
+## vue3.0有什么更新
+
+
+
 ## 简述mixin、extends的覆盖逻辑
 
-
+ 
 
 ## Vue和React的区别
