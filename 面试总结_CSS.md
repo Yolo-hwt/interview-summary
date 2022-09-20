@@ -598,6 +598,99 @@ li:nth-child(7n)，则表示选中7的倍数。。
 - 如果两个相同权重的选择器作用在同一元素上：**以后面出现的选择器为最后规则.**
 - 权重相同时，与元素距离近的选择器生效（如外链css规则和html中定义的规则）
 
+## CSS中属性的继承性
+
+**tips：记一下默认继承的剩下就是默认不继承的**
+
+**默认继承的 ("Inherited: Yes") 的属性：**
+
+- 所有元素默认继承：**visibility、cursor**
+- **文本属性默认继承**：letter-spacing、word-spacing、white-space、line-height、color、font、 font-family、font-size、font-style、font-variant、font-weight、text-indent、text-align、text-shadow、text-transform、direction
+- **列表元素默认继承**：list-style、list-style-type、list-style-position、list-style-image
+- **表格元素默认继承**：border-collapse
+
+**默认不继承的("Inherited: No") 的属性：**
+
+- 所有元素默认不继承：all、display、overflow、contain
+- 文本属性默认不继承：vertical-align、text-decoration、text-overflow
+- 盒子属性默认不继承：width、height、padding、margin、border、min-width、min-height、max-width、max-height
+- 背景属性默认不继承：background、background-color、background-image、background-repeat、background-position、background-attachment
+- 定位属性默认不继承：float、clear、position、top、right、bottom、left、z-index
+- 内容属性默认不继承：content、counter-reset、counter-increment
+- 轮廓属性默认不继承：outline-style、outline-width、outline-color、outline
+- 页面属性默认不继承：size、page-break-before、page-break-after
+- 声音属性默认不继承：pause-before、pause-after、pause、cue-before、cue-after、cue、play-during
+
+## visibility
+
+CSS 属性 `visibility` 显示或隐藏元素而不更改文档的布局。该属性还可以隐藏 表格table 中的行或列
+
+```
+/* Keyword values */
+visibility: visible;
+visibility: hidden;
+visibility: collapse;
+
+/* Global values */
+visibility: inherit;
+visibility: initial;
+visibility: unset;
+```
+
+- **visible**
+
+元素正常显示。
+
+- **hidden**
+
+隐藏元素，但是其他元素的布局不改变，相当于此元素变成透明。要注意若将其子元素设为 `visibility: visible`，则该子元素依然可见。
+
+- **collapse**
+
+`collapse` 关键字对于不同的元素有不同的效果：
+
+- 用于表格行、列、列组和行组，隐藏表格的行或列，并取消隐藏部分的空间占用（与将 `display: none` 用于表格的行/列上的效果相当）。不影响其他行列但是，就好像折叠的行或列中的单元格一样。此值允许从表中快速删除行或列，而不强制重新计算整个表的宽度和高度。
+- 折叠的弹性项目被隐藏，他们将占用的空间被删除。
+- 对于 [XUL](https://developer.mozilla.org/zh-CN/docs/Mozilla/Tech/XUL) 元素，元素的计算大小始终为零，而且通常会忽略影响大小的其他样式，尽管边距仍然有效。
+- 对于其他元素，折叠处理与隐藏相同。
+
+## filter:alpha()和opacity
+
+filter:alpha()与opacity都是用来设置透明度的，区别就在于兼容性的问题，**opacity支持高版本的浏览器，IE8以上不包含IE8.**
+
+- **opacity**
+  1.opacity的取值范围在0到1之间，1代表完全不透明。
+- **filter:alpha()**
+  1.filter:alpha(opacity=20）表示设置透明度为20，其中透明度范围为0-100，100为不透明。
+
+**filter:alpha()语法**
+
+```css
+filter：alpha（opacity，finishopacity，style，startX，startY，finishX，finishY）
+
+//finishopacity：设置渐变的透明效果时，用来指定结束时的透明度，范围也是0 到 100。
+//style：设置渐变透明的样式，值为0代表统一形状、1代表线形、2代表放射状、3代表长方形。
+//startX和startY：渐变透明效果的开始X和Y坐标。
+//finishX和finishY：渐变透明效果结束X和Y 的坐标。
+```
+
+## 超链接的link、vlink、alink
+
+超链接文字的状态可以通过伪类选择符＋样式规则来控制。 
+
+一组专门的预定义的类称为伪类，主要用来处理超链接的状态。超链接文字的状态可以通过伪类选择符＋样式规则来控制。伪类选择符包括：
+
+① **a:link**：未访问链接 ,如 .mycls a:link {color:blue}
+② **a:visited**：已访问链接 ,
+③ **a:active**：激活时（链接获得焦点时）链接的颜色 ,
+④ **a:hover**：鼠标移到链接上时 ,
+
+一般a:hover和a:visited链接的状态（颜色、下划线等）应该是相同的。
+
+**前三者分别对应body元素的link、vlink、alink这三个属性。**
+
+四个“状态”的先后过程是：a:link ->a:hover ->a:active ->a:visited。另外，a:active不能设置有无下划线（总是有的）。
+
 ## CSS定位
 
 ## CSS3新特性
