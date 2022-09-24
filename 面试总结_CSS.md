@@ -401,8 +401,8 @@ styleSheet.cssRules[index].style.propertyName=...
 
 这里是插入一条css规则也就是一对大括号内容，如#someid{...}
 
-```
-stylesheet.insertRule(rule [, index])
+```js
+stylesheet.insertRule(rule [, index])//默认头部插入相当于stylesheet.insertRule('.test{width:100px;}',0)
 stylesheet.deleteRule(index)
 ```
 
@@ -645,11 +645,13 @@ visibility: unset;
 
 隐藏元素，但是其他元素的布局不改变，相当于此元素变成透明。要注意若将其子元素设为 `visibility: visible`，则该子元素依然可见。
 
+子元素上定义的事件无法触发
+
 - **collapse**
 
 `collapse` 关键字对于不同的元素有不同的效果：
 
-- 用于表格行、列、列组和行组，隐藏表格的行或列，并取消隐藏部分的空间占用（与将 `display: none` 用于表格的行/列上的效果相当）。不影响其他行列但是，就好像折叠的行或列中的单元格一样。此值允许从表中快速删除行或列，而不强制重新计算整个表的宽度和高度。
+- **用于表格行、列、列组和行组，隐藏表格的行或列**，并取消隐藏部分的空间占用（与将 `display: none` 用于表格的行/列上的效果相当）。不影响其他行列但是，就好像折叠的行或列中的单元格一样。**此值允许从表中快速删除行或列，而不强制重新计算整个表的宽度和高度。**
 - 折叠的弹性项目被隐藏，他们将占用的空间被删除。
 - 对于 [XUL](https://developer.mozilla.org/zh-CN/docs/Mozilla/Tech/XUL) 元素，元素的计算大小始终为零，而且通常会忽略影响大小的其他样式，尽管边距仍然有效。
 - 对于其他元素，折叠处理与隐藏相同。
@@ -692,6 +694,20 @@ filter：alpha（opacity，finishopacity，style，startX，startY，finishX，f
 四个“状态”的先后过程是：a:link ->a:hover ->a:active ->a:visited。另外，a:active不能设置有无下划线（总是有的）。
 
 ## CSS定位
+
+position
+
+relative
+
+absolute
+
+fixed
+
+使用 `fixed` 进行布局的元素，在一般情况下会相对于屏幕视窗来进行定位。但是如果父元素的 **`transform`, `perspective` 或 `filter` 属性不为 `none`** 时，position为`fixed` 的元素就会相对于父元素来进行定位。
+
+static
+
+sticky
 
 ## CSS3新特性
 

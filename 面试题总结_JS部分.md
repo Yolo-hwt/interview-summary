@@ -251,6 +251,8 @@ false==undefined//false
 - **如果类型不同，就不相等**
 
 - 如果两个都是数值，并且是同一个值，那么相等，例外的是，如果其中至少一个是NaN，那么不相等。（**判断一个值是否是 NaN，只能用isNaN() 来判断**）
+  - !NaN==false//true
+
 - 如果两个都是字符串，每个位置的字符都一样，那么相等；否则不相等。
 - 如果两个值都是true，或者都是false，那么相等。
 - 如果两个值都引用同一个对象或函数，那么相等；否则不相等。
@@ -1068,7 +1070,124 @@ fetch 不是 ajax 的进一步封装，而是原生 js，没有 使用 XMLHttpRe
 
 在等待异步任务准备的同时，JS引擎去执行其他同步任务，等到异步任务准备好了，再去执行回调。完成相同的任务，花费的时间大大减少，这种方式也被叫做**非阻塞式**。
 
-## **事件循环机制**
+## AsyncFunction异步对象
+
+`AsyncFunction` 构造函数用来创建新的 [`异步函数`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function) 对象，JavaScript 中每个异步函数都是 `AsyncFunction` 的对象。
+
+但是AsyncFunction并不是一个全局对象，需要通过下面的方法来获取
+
+```js
+var AsyncFunction=Object.getPrototypeOf(async function(){}).constructor
+var testAsync=new AsyncFunction([arg1[，arg2[，...argN]]，] functionBody)
+/*
+如下使用实例
+*/
+function resolveAfter2Seconds(x) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(x);
+    }, 2000);
+  });
+}
+
+var AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+var a = new AsyncFunction('a',
+                          'b',
+                          'return await resolveAfter2Seconds(a) + await resolveAfter2Seconds(b);');
+a(10, 20).then(v => {
+  console.log(v); // 4 秒后打印 30
+});
+```
+
+`AsyncFunction` 实例继承了 `AsyncFunction.prototype` 的方法和属性。
+
+和所有构造函数一样，修改 `AsyncFunction` 构造函数的原型对象会同时对所有 `AsyncFunction` 实例上生效
+
+- **与async表达式方法创建的异同**
+
+！！！AsyncFunction创建没有直接使用异步表达式高效
+
+ `AsyncFunction` 
+
+先创建一个异步函数对象，再将其作为异步方法调用
+
+`async表达式`
+
+先定义一个异步函数，再调用其来创建异步对象
+
+第二种方式中异步函数是与其他代码一起被解释器解析的，而第一种方式的函数体是单独解析的。
+
+- **与eval不同的地方**
+
+ `AsyncFunction` 构造函数创建的[`异步函数`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function) 并不会在当前上下文中创建闭包，其**作用域始终是全局的。**
+
+因此运行的时候**只能访问它们自己的本地变量和全局变量**，但不能访问构造函数被调用的那个作用域中的变量。这是它与 [`eval`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval) 不同的地方。
+
+## eval
+
+**`eval(string)`** 函数会将传入的字符串当做 JavaScript 代码进行执行。
+
+```js
+console.log(eval('2 + 2') === eval('4'));
+// expected output: true
+```
+
+若参数不是字符串，则原封不动的返回
+
+```js
+eval(new String("2 + 2")); // 返回了包含"2 + 2"的字符串对象
+eval("2 + 2");             // returns 4
+```
+
+函数作为字符串需要使用括号包裹
+
+```js
+var fnStr1='function a(){}'
+var fnStr2='(function a(){})'
+eval(fnStr1)//返回 undefined
+eval(fnStr2)//返回一个函数
+```
+
+通过引用来调用的eval工作在全局环境，执行期间不能在被调用的作用域中访问局部变量
+
+```js
+function test() {
+  var x = 2, y = 4;
+  console.log(eval('x + y'));  // 直接调用，使用本地作用域，结果是 6
+  var geval = eval; // 等价于在全局作用域调用
+  console.log(geval('x + y')); // 间接调用，使用全局作用域，throws ReferenceError 因为`x`未定义
+  (0, eval)('x + y'); // 另一个间接调用的例子
+}
+```
+
+- **危险**
+
+eval使用与调用者相同的权限执行代码，若其中字符串参数被恶意改变可能会导致一定的损失
+
+- **性能较低**
+
+`eval()` 通常比其他替代方法更慢，因为它**必须调用 JS 解释器**，而许多其他结构则可被现代 JS 引擎进行优化。
+
+现代 JavaScript 解释器将 **JavaScript 转换为机器代码**，任意一个 eval 的使用都会**强制浏览器进行冗长的变量名称查找**，以确定变量在机器代码中的位置并设置其值
+
+另外，新内容将会通过 `eval()` 引进给变量，比如更改该变量的类型，因此会**强制浏览器重新执行所有已经生成的机器代码**以进行补偿
+
+- **解决性能问题得替代方法**
+
+```js
+/*Bad*/
+function looseJsonParse(obj){
+    return eval("(" + obj + ")");
+}
+/*Good*/
+function looseJsonParse(obj){
+    return Function('"use strict";return (' + obj + ')')();
+}
+```
+
+
+
+## 事件循环机制
 
 - **事件循环指的是js代码所在运行环境（浏览器、nodejs）编译器的一种解析执行规则**
 
