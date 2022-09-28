@@ -130,7 +130,13 @@
 </script>
 ```
 
+v-model 本质上不过是语法糖，v-model 在内部为不同的输入元素使用不同的属性并抛出不同的事件：
 
+- text 和 textarea 元素使用 value 属性和 input 事件；
+- checkbox 和 radio 使用 checked 属性和 change 事件；
+- select 字段将 value 作为 prop 并将 change 作为事件。
+
+- 如果在自定义组件中，v-model 默认会利用名为 value 的 prop 和名为 input 的事件
 
 ## vue对于对象，数组的响应式动态更新
 
@@ -264,6 +270,8 @@ Vue 在内部对异步队列尝试使用原生的 `Promise.then`、`MutationObse
 ## vue组件通信
 
 ### 父子组件通信(9种方式)
+
+![image-20220926133015149](%E9%9D%A2%E8%AF%95%E9%A2%98%E6%80%BB%E7%BB%93_VUE%E9%83%A8%E5%88%86.assets/image-20220926133015149.png)
 
 #### **props（父传子）**
 
@@ -628,7 +636,7 @@ changeAppAttrName() {
 
 3.在子组件中使用**props接收value**（由于是v-model绑定的所以固定以value声明），额外定义一个localValue来存储并同步父组件的value值
 
-```
+```js
 props: {
     value: {
       type: Number,
@@ -645,7 +653,7 @@ watch: {
     },
 },
 create(){
-//为了创建时同步父组件的value值
+//为了创建时同步父组件的value值js
 this.localValue=this.value
 }
 ```
@@ -1722,6 +1730,84 @@ function sameVnode(oldVnode, newVnode) {
 
 
 在一个大型列表所有数据都变了的情况下，重置 innerHTML 其实是一个还算合理的操作，这时候直接操作真实dom的代价与之相比又要稍好一些，所以不是绝对的
+
+## @hook
+
+问题引入：如何实现父组件监听子组件的声明周期
+
+- **自定义事件**
+
+```vue
+// 父组件
+<template>
+  <div>
+    <Child
+      @mounted="onMounted"
+      @updated="onUpdated"
+      @beforeDestroy="onBeforeDestroy"
+    ></Child>
+  </div>
+</template>
+
+// 子组件
+...
+  mounted () {
+	  this.$emit('mounted')
+  }
+  updated () {
+	  this.$emit('updated')
+  }
+  beforeDestroy () {
+	  this.$emit('beforeDestroy')
+  }
+...
+```
+
+父组件给子组件传递了多个回调，依赖于子组件在自身生命周期通过vm.$emit调用
+
+缺点：
+
+子组件必须是我们自己编写的组件，若是一个第三方库则无法满足需求（第三方库不能保证自身生命周期通过vm.$emit调用）
+
+
+
+- **@hook**
+
+```vue
+// 父组件
+<template>
+  <div>
+    <Child
+      @hook:mounted="onMounted"
+      @hook:updated="onUpdated"
+      @hook:beforeDestroy="onBeforeDestroy"
+    ></Child>
+  </div>
+</template>
+
+// 子组件
+<!--无-->
+```
+
+可以看到代码非常简洁，同时支持所有的组件使用
+
+**为什么支持？（官方文档也没有介绍hook）**
+
+源码解读：
+
+在vue2源码的`lifecycle.js`文件里，我们发现`vue`的生命周期的各个阶段都会去调用一个`callHook`函数，它支持两个参入，分别是实例`vm`和对应的生命周期钩子名称。
+
+而`callHook`里面就执行了`vm.$emit('hook:' + hook)`
+
+
+
+所以我们在只需在父组件中为子组件绑定`@hook:mounted`，也就是执行了`vm.$emit(hook:mounted)`
+
+那么在vue2内部执行生命周期钩子的时候就会自动调用`vm.$emit('hook:mounted')`
+
+
+
+
 
 ## vue3.0有什么更新
 

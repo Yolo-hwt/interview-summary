@@ -53,7 +53,7 @@ typeof(Function)	//function
 
 - instanceof
 
-instanceof **只能正确判断引用数据类型**，而不能判断基 本数据类型。
+instanceof **只能正确判断引用数据类型**，而不能判断基 本数据类型。//基本数据类型没有__proto__
 
 ```
 2 instanceof Number		//false
@@ -214,6 +214,7 @@ undefined和null没有toString()和valueOf()
 
 ```
 null==undefined		//true
+{}=={}				//false
 ```
 
 null和undefined相等是因为二者都是假值吗？
@@ -251,7 +252,7 @@ false==undefined//false
 - **如果类型不同，就不相等**
 
 - 如果两个都是数值，并且是同一个值，那么相等，例外的是，如果其中至少一个是NaN，那么不相等。（**判断一个值是否是 NaN，只能用isNaN() 来判断**）
-  - !NaN==false//true
+  - !NaN==false		//true
 
 - 如果两个都是字符串，每个位置的字符都一样，那么相等；否则不相等。
 - 如果两个值都是true，或者都是false，那么相等。
@@ -474,7 +475,7 @@ JS作用域可以分为两大类：**全局作用域 、局部作用域（函数
 
 **常见问题**
 
-et/const关键字未出现之前，typeof运算符是百分之百安全的，现在也会引发暂时性死区的发生
+let/const关键字未出现之前，typeof运算符是百分之百安全的，现在也会引发暂时性死区的发生
 
 像import关键字引入公共模块、使用new class创建类的方式，也会引发暂时性死区
 
@@ -2039,126 +2040,15 @@ function flatDeep(arr) {
 }
 ```
 
-- ## js两元素交换位置
+- **直接使用es6的flat方法**
 
-  所有例子以a,b两元素交换为例
-
-  1.中转变量
-
-  ```javascript
-  let temp=a;
-  a=b;
-  b=temp;
-  ```
-
-  2.算术和或算数减
-
-  ```javascript
-  //算术和
-  a+=b;
-  b=a-b;//此时b=原先的a值
-  a-=b;
-  //算术减
-  a-=b;
-  b=a+b;//此时b=原先的a值
-  a=b-a;s
-  ```
-
-  3.位运算
-
-  ```javascript
-  //同0 异1
-  //与0异或得其自身
-  //与1异或取反
-  a ^= b;
-  b ^= a;
-  a ^= b;
-  //或者这样
-  a = (b^=a^=b)^a;
-  ```
-
-  4.对象
-
-  ```javascript
-  a = {a:b,b:a};
-  b = a.b;
-  a = a.a；
-  ```
-
-  5.数组
-
-  ```javascript
-  a = [a, b];
-  b = a[0];
-  a = a[1];
-  ```
-
-  6.es6结构赋值
-
-  ```javascript
-  [a,b]=[b,a]
-  ```
-
-  ## js数组扁平化
-
-  - **递归**
-  - 通过循环递归的方式，一项一项地去遍历数组，如果每一项还是一个数组，那么就继续往下遍历
-
-  ```javascript
-  function flatDeep(arr){
-  let result=[];
-      for(let i=0;i<arr.length;i++){
-          if(Array.isArray(arr[i])){
-          result=result.concat(flatDeep(arr[i]))
-          }else{
-          result.push(arr[i])
-          }
-      }
-  return result;
-  }
-  ```
-
-  - **toString+split+map**
-  - 先通过toString()把数组扁平化转成String对象，再结合split() 方法使用逗号分隔符将String对象分割成字符串数组，再用map函数将数组中的字符串转成数字。
-
-  ```javascript
-  function flatDeep(arr){
-  	let result = [];
-  	return result = arr.toString().split(',').map(Number)
-  }
-  ```
-
-  - **reduce函数**
-  - 与递归方式相似，判断每一项是否为数组
-
-  ```javascript
-  function flatDeep(arr) {
-      return arr.reduce((pre, curValue) => {
-          return pre.concat(Array.isArray(curValue) ?  flatDeep(curValue) : curValue)
-      }, [])
-  }
-  ```
-
-  - **扩展运算符+some函数**
-  - 利用ES6新增的扩展运算符并循环判断数组中是否还有数组项，进行扩展运算
-
-  ```javascript
-  function flatDeep(arr) {
-      while (arr.some((item) => Array.isArray(item))) {
-          arr = [].concat(...arr)
-      }
-  }
-  ```
-
-  - **直接使用es6的flat方法**
-
-  ```javascript
-  var newArray = arr.flat([depth])
-  //参数depth是指定要提取嵌套数组的结构深度，默认值为1。参数depth也可以传进 Infinity，代表不论多少层都要展开
-  function flatDeep(arr) {
-  	return arr.flat(Infinity)
-  }
-  ```
+```javascript
+var newArray = arr.flat([depth])
+//参数depth是指定要提取嵌套数组的结构深度，默认值为1。参数depth也可以传进 Infinity，代表不论多少层都要展开
+function flatDeep(arr) {
+	return arr.flat(Infinity)
+}
+```
 
 
 
@@ -2469,7 +2359,7 @@ define(function(require, exports, module) {
 
 **`window.requestAnimationFrame()`** 告诉浏览器——你希望执行一个动画，并且要求浏览器在**下次重绘之前调用指定的回调函数更新动画**。
 
-该方法需要传入一个回调函数作为参数，该回调函数会在浏览器下一次重绘之前执行 
+该方法需要传入一个回调函数作为参数，该回调函数会在**浏览器下一次重绘之前执行** 
 
 如果某个函数会改变网页的布局，一般就放在window.requestAnimationFrame()里面执行，
 
@@ -2596,7 +2486,7 @@ this 是执行上下文中的一个属性，它指向最后一次调用这个方
             }, 3000)
 ```
 
-- promise
+- **promise**
 
 使用 Promise 的方式可以将嵌套的回调函数作为 链式调用。
 
@@ -2613,7 +2503,7 @@ new Promise((resolve,reject)=>{
 ...
 ```
 
-- async/await
+- **async/await**
 
 1.async 函数 的方式，async 函数是 generator 和 promise 实现的 一个**自动执行的语法糖**
 
@@ -2626,15 +2516,22 @@ new Promise((resolve,reject)=>{
 5.`await` 以前的代码，相当于与 `new Promise` 的同步代码，`await` 以后的代码相当于 `Promise.then`的异步
 
 ```javascript
-setTimeout(() => console.log(4))
+setTimeout(() => console.log(5))
 async function test() {
-  console.log(1)
-  await Promise.resolve()//微任务
-  console.log(3)
+  console.log(1);
+  await test2();
+  console.log(4);
+}
+async function test2(){
+    console.log(2)
 }
 test()
-console.log(2)
-//输出：1，2，3，4
+console.log(3)
+//输出：1，2，3，4，5
+//这里await部分可以看作
+Promise.resolve(test2()).then(() => {
+        console.log(4);
+    })
 ```
 
 因此 可以将异步逻辑，转化为同步的顺序来书写，并且这个函数可以自动 执行
@@ -3711,6 +3608,28 @@ doctype标签: document.doctype
 ## js数据四舍五入
 
 Math.
+
+## Object.hasOwn或hasOwnProperty？
+
+`Object.hasOwn`
+
+`Object.prototype.hasOwnProperty`
+
+两者在函数作用上一致，但是推荐使用`hasOwn`
+
+1. 对于**使用Obejct.create(null)创建的对象**
+
+Object.create(null) 会创建一个不从 Object.prototype 继承的对象，这使得Object.prototype 上的方法无法访问。
+
+2. **重写原型上的hasOwnProperty方法**
+
+如果你对对象的内置属性进行了重新赋值改写，那么你在调用某个属性（比如：.hasOwnProperty）时，肯定调用的不是对象的内置属性
+
+3. **ESLint no-prototype-builtins**
+
+在ESLint的[规则 built-in rule](https://eslint.org/docs/rules/no-prototype-builtins) 中，是禁止直接使用 Object.prototypes 内置函数
+
+综上，使用Object.hasOwn更加优秀
 
 ## MutationObserver
 

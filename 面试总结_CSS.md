@@ -693,6 +693,25 @@ filter：alpha（opacity，finishopacity，style，startX，startY，finishX，f
 
 四个“状态”的先后过程是：a:link ->a:hover ->a:active ->a:visited。另外，a:active不能设置有无下划线（总是有的）。
 
+## img元素底部为何有空白
+
+CSS对于 display: inline 元素的 **vertical-align 默认值是 baseline**，这是一个西文排版才有的概念
+
+![img](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/f0f1e7625a10b204bc32c7203835740d_r.jpg)可以看到，出现在[baseline](https://www.zhihu.com/search?q=baseline&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"answer"%2C"sourceId"%3A18615056})下面的是 p 啊，q 啊,  g 啊这些字母下面的那个尾巴。
+
+对比一下 vertical-align 的另外两个常见值，top 和 bottom:
+
+![img](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/fa1bef7a27a3c235a2e9bd8de5ba5448_720w.jpg)![img](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/fa1bef7a27a3c235a2e9bd8de5ba5448_r.jpg)
+
+**inline 的图片下面那一道空白正是 baseline 和 bottom 之间的这段距离**。
+
+即使只有图片没有文字，只要是 [inline](https://www.zhihu.com/search?q=inline&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"answer"%2C"sourceId"%3A18615056}) 的图片这段空白都会存在。
+
+解决
+
+1. line-height=0
+2. font-size=0
+
 ## CSS定位
 
 position
