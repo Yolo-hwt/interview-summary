@@ -3083,87 +3083,6 @@ Array.from(allli).filter(node => {
 - **HTMLElement.innerText **获取结点的渲染后文本内容
 - textContent会不会解析其样式而直接返回为文本内容
 
-## client、offset、scroll
-
-这几个属性开头的height,width日常混淆，以height,top为例做说明
-
-- **clientHeight（内容高度+padding）**
-- **Element.clientHeight**
-
-只读属性
-
-元素内部的高度 (单位像素)，包含内边距，但**不包括水平滚动条、边框和外边距**。
-
-**注意：**
-
-！！！对于**没有定义 CSS 或者内联布局盒子（inline）的元素为 0**
-
-**返回一个整数**(浮点数四舍五入得到)。
-
-![img](面试题总结_JS部分.assets/2fedf514554040e482f0f03d2375385ctplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
-
-
-
-- **offsetHeight（内容+内边距+边框+滚动条）**
-- **HTMLElement.offestHeight**
-
- 一个只读属性
-
-返回该元素高度，**包含该元素的内容、内边距、边框和滚动条（如果有的话）**，不包含:before 或:after 等伪类元素的高度。
-
-**注意：**
-
-！！！如果**元素被隐藏**（例如 元素或者元素的祖先之一的元素的 **style.display 被设置为 none**），**则返回 0**
-
-**返回一个整数**(浮点数四舍五入得到)。
-
-![img](面试题总结_JS部分.assets/ba3750b28f464205a24e1f8f186a4d4atplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
-
-- **scorllHeight**
-
-当本元素的子**元素比本元素高且overflow=scroll**时，本元素会scroll
-
- **scrollHeight**: 包括当前不可见部分的元素的高度。
-
-而可见部分的高度其实就是clientHeight，也就是**scrollHeight>=clientHeight恒成立**。
-
-在**没有滚动条时scrollHeight==clientHeight恒成立**。单位px，只读元素。
-
-![img](面试题总结_JS部分.assets/1368cfc0c44a4cc9b8e62b02eefbb0f7tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
-
-- **scrollTop**:
-
-代表在有滚动条时，**滚动条向下滚动的距离**也就是元素顶部被遮住部分的高度。在**没有滚动条时scrollTop==0恒成立**。
-
-单位px，可读可设置。
-
-![img](面试题总结_JS部分.assets/957d454b02864754a0001afb5487d25ctplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
-
-- **offsetTop**（与滚动条无关）
-
-**当前元素顶部距离最近父元素顶部的距离**,和有没有滚动条没有关系。
-
-单位px，只读元素。
-
-![img](面试题总结_JS部分.assets/5482d8c06b5243ef976d908158ae4136tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
-
-## getBoundingClientRect()
-
-方法返回一个 [`DOMRect`](https://developer.mozilla.org/zh-CN/docs/Web/API/DOMRect) 对象，是包含整个元素的最小矩形（包括 `padding` 和 `border-width`），其提供了元素的大小及其相对于[视口](https://developer.mozilla.org/zh-CN/docs/Glossary/Viewport)的位置。
-
-该对象使用 `left`、`top`、`right`、`bottom`、`x`、`y`、`width` 和 `height` 这几个**以像素为单位的只读属性**描述整个矩形的位置和大小。
-
-除了 `width` 和 `height` 以外的属性是相对于视图窗口的左上角来计算的。
-
-<img src="面试题总结_JS部分.assets/element-box-diagram.png" alt="img" style="zoom:50%;" />
-
-**注意：**
-
-**width/height**
-
-- 在标准盒子模型中，这两个属性值分别与元素的 `width`/`height` + `padding` + `border-width` 相等。
-- 而如果是 [`box-sizing: border-box`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/box-sizing)，两个属性则直接与元素的 `width` 或 `height` 相等。
-
 ## 立即执行函数
 
 **立即执行函数(IIFE)**（ 立即调用函数表达式）
@@ -3630,6 +3549,205 @@ Object.create(null) 会创建一个不从 Object.prototype 继承的对象，这
 在ESLint的[规则 built-in rule](https://eslint.org/docs/rules/no-prototype-builtins) 中，是禁止直接使用 Object.prototypes 内置函数
 
 综上，使用Object.hasOwn更加优秀
+
+## Map
+
+***1.Map和Objct的区别***
+
+- **键值**：`Map`可以是任意值，包括函数，对象，基本类型，而对象只能是`String`或者`Symbol`或者整数
+
+- **键值对长度**：`Map`可以直接通过`size`属性获取键值对长度，而`Object`没有提供该属性，需要手动遍历计算
+
+- **迭代**：`Map`是可迭代的，有内置迭代器，但是`Object`没有实现迭代协议，没有内置迭代器
+
+  ```js
+  console.log(typeof obj[Symbol.iterator]); //undefined 
+  console.log(typeof map[Symbol.iterator]); //function
+  ```
+
+- **性能**：`Map`在频繁增删键值对的场景下表现更好,而`Object`在频繁添加和删除键值对的场景下未作出优化
+
+- **序列化**：`JSON`支持`Object`，但是尚未支持`Map`
+
+  ```js
+  const obj = {
+    name: 'clt',
+    age: 20
+  }
+  const map = new Map();
+  //map.prototype.set返回一个map对象故支持链式调用
+  map.set('name','clt').set('age',20);
+  console.log(JSON.stringify(obj)); //{"name":"clt","age":20}
+  console.log(JSON.stringify(map));//{} 
+  ```
+
+- **有序**：`Map`是有序的，但是`Object`不能保证是有序的
+
+  - Map有序我们前面已经提过了，试一下Object是否能够保证有序
+
+    ```js
+          //比如我创建一个如下的Object
+          const o = Object.create(null, {
+            m: {value: function() {}, enumerable: true},
+            "2": {value: "2", enumerable: true},
+            "b": {value: "b", enumerable: true},
+            0: {value: 0, enumerable: true},
+            [Symbol()]: {value: "sym", enumerable: true},
+            "1": {value: "1", enumerable: true},
+            "a": {value: "a", enumerable: true},
+          });
+    ```
+
+  - 直接打印结果(chrome，这个结果在不同浏览器上不一定一致) ![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/121afdfdb051486cb2408a70109b902d~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp?)
+
+  - for-in遍历打印结果
+
+  ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7f2118937b554af0b812d173b2fd70bf~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp?)
+
+- 看完已经很烦了❌？上图✔️ ![image.png](%E9%9D%A2%E8%AF%95%E9%A2%98%E6%80%BB%E7%BB%93_JS%E9%83%A8%E5%88%86.assets/bbbb5b4094f144739ff478a048a0c4betplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
+
+
+
+**2. ✍ 什么时候使用Map**
+
+- 向Object和Ma插入新键值对的消耗相当，但是一般插入Map会比较快一点，所以如果代码涉及大量插入操作，那么Map的性能更加
+- 当我们只需要一个简单的可查找存储结构时，`Map`相比`Object`更具优势，它提供了所有基本操作，但是如果涉及大量查找情况下，可能选择Object会好一点
+- 如果涉及大量删除操作，美美选择Map啦
+
+
+
+**3. ✍ 上面提到了可以迭代，那么是怎么迭代呢**
+
+- Map 可以使用 
+
+  ```
+  for..of
+  ```
+
+   循环来实现迭代
+
+  ```js
+  //创建map结构
+  const map = new Map();
+  //添加键
+  map.set('name','clt').set('gender','girl').set('age',20);
+  for(let [key,item] of map) {
+    console.log(key +'='+ item)
+  }
+  复制代码
+  ```
+
+- Map 也可以通过 forEach() 方法迭代，传入回调函数依次迭代每个键值对，有可选的第二个参数，用于重写回调内this的值
+
+  ```js
+  //创建map结构
+  const map = new Map();
+  //添加键
+  map.set('name','clt').set('gender','girl').set('age',20);
+  map.forEach((value, key) => {
+    console.log(key + '=' + value)
+  })
+  ```
+
+  > 这种行为跟在数组上调用forEach()方法略有不同，后者的回调函数会按照数值索引的顺序接收到每一个项，
+
+
+
+**4. ✍ 是否可以一次性将大量数据添加到Map**
+
+- 可以在构造Map的时候传入数组来初始化，该数组的每一项也必须是数组，内部首个项作为键，第二项作为对应值
+
+  ```js
+  const arr = [['name', 'mouche'] ,[ 'age', 20]];
+  const map = new Map(arr);
+  for(let [key, value] of map) {
+    console.log(key+'='+ value);
+  } 
+  //name=mouche, age=20
+  复制代码
+  ```
+
+## WeakMap
+
+- **`WeakMap`** 对象是一组键/值对的集合
+- 其中的键是**弱引用**的。
+- 其**键必须是对象(null除外)**，而值可以是任意的
+
+**1.什么是弱引用**
+
+- 指不能确保其引用的对象不会被垃圾回收器回收的引用
+
+- 一个对象若只被弱引用所引用，则被认为是不可访问（或弱可访问）的，并因此**可能在任何时刻被回收**
+- 也就是说，**当WeakMap键所指对象没有其他地方引用的时候，它会被垃圾回收机制回收掉**
+
+
+
+**2.weakMap的注意点**
+
+`WeakMap` 不支持迭代以及 `keys()`，`values()` 和 `entries()` 方法
+
+WeakMap的方法
+
+- `get(key）`：获取键对应值
+- `set(key,value)`:存储键值对
+- `delete(key)`: 删除键值对
+- `has(key)`: 判断是否有该键值对
+
+
+
+**3.weakMap的好处**
+
+鉴于weakMap并不会阻碍垃圾回收，所以非常适合保存关联元数据
+
+- 保存dom结点（解决游离dom引用导致的内存泄露）
+
+  - ```js
+    const wm = weakMap();
+    cons loginButton = document.querySelector('#login');
+    wm.set(loginButton,{disabled:true})
+    ```
+
+    
+
+  - 当节点从DOM树被删除后，垃圾回收机制就可以立即释放其内存（如果没有其他地方引用），但是如果使用Map的话，即使节点删除后，由于映射中还保存着按钮的引用，所以DOM节点依旧会留在内存
+
+## 模块化
+
+- **commonJS**
+
+Node 中的模块规范，通过 `require` 及 `exports` 进行导入导出
+
+ `cjs` 模块可以运行在 node 环境及 webpack 环境下的，但不能在浏览器中*直接*使用
+
+**！！！运行时加载，模块输出一个值的拷贝**
+
+
+
+- **esm**
+
+对于 ESMAScript 的模块话规范，正因是语言层规范，**因此在 Node 及 浏览器中均会支持**
+
+使用 `import/export` 进行模块导入导出.
+
+是未来的趋势，目前一些 CDN 厂商，前端构建工具均致力于 cjs 模块向 esm 的转化，比如 `skypack`、 `snowpack`、`vite` 等。
+
+**！！！静态导入，可以在编译期进行Tree Shaking，输出值的引用**
+
+**Tree Shaking**
+
+`Tree Shaking` 指基于 ES Module 进行静态分析，通过 AST 将用不到的函数进行移除，从而减小打包体积。
+
+**core-js**
+
+core-js是关于 ES 标准最出名的 `polyfill`，polyfill 意指当浏览器不支持某一最新 API 时，它将帮你实现
+
+
+
+- **umd**
+
+兼容 `cjs` 与 `amd` 的模块，既可以在 node/webpack 环境中被 `require` 引用，也可以在浏览器中直接用 CDN 被 `script.src` 引入。
+
+
 
 ## MutationObserver
 

@@ -358,7 +358,7 @@ methods: {
   >
   > 要注意边界情况，如在`#app`上拿`$parent`得到的是`new Vue()`的实例，在这实例上再拿`$parent`得到的是`undefined`，而在最底层的子组件拿`$children`是个空数组。也要注意得到`$parent`和`$children`的值不一样，`$children` 的值是数组，而`$parent`是个对象
 
-```
+```js
 父组件操作子组件数据
 //methods
 changeChildrenData() {
