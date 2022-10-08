@@ -276,6 +276,24 @@ undefined===undefined //true
 
 ![img](面试题总结_JS部分.assets/201774144228938.png)
 
+注意这里还可以使用`Object.is()`来判断两个数据的相等与否
+
+双等号和三等号将0值视为相等，NaN严格不相等
+
+```js
+-0==0		//true
+-0===0		//true
+NaN==NaN	//false
+NaN===NaN	//false
+```
+
+而Object.is可以区别
+
+```js
+Object.is(-1,0)		//false
+Object.is(NaN,NaN)	//true
+```
+
 
 
 ## let_const_var
@@ -684,6 +702,8 @@ const关键字保证变量指向的那个内存地址不能被修改
 
 ## new创建一个对象实现步骤
 
+
+
 1.创建对象（堆分配内存创建空对象，栈存放指向此块内存对象的指针）
 
 2.构造函数的作用域赋给新对象（即对象的下划线proto属性指向构造函数的prototype）
@@ -691,6 +711,28 @@ const关键字保证变量指向的那个内存地址不能被修改
 3.指向构造函数中的代码，构造函数中的this指向该对象，为对象添加属性和方法
 
 4.返回新对象
+
+## new.target
+
+**`new.target`**属性允许你检测函数或构造方法是否是通过[new](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new)运算符被调用的。
+
+- 在通过[new](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new)运算符被初始化的函数或构造方法中，`new.target`返回一个指向构造方法或函数的引用。
+- 在普通的函数调用中，`new.target` 的值是[`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)。
+
+```js
+function Student() {
+    if (!new.target) {
+        console.log('must be called with new');
+    } else {
+        console.log('good use');
+        this.name = 'hwt'
+    }
+}
+let s = new Student();//good use
+Student();//must be called with new
+```
+
+
 
 ## Proxy是什么
 
@@ -2431,6 +2473,14 @@ ES5 中新增了一个 **Object.getPrototypeOf()** 方法，可以通过这个�
 
 - 当修改原型时，与之相关的对 象也会继承这一改变
 
+
+
+**与构造器constructor的区别**
+
+构造器是对象创建的模板，而prototype是对象扩展的手段
+
+对象创建就是以构造器为模板创建新对象并将对象的__proto指向构造器的prototype
+
 ## 原型链的终点是什么？如何打印出原型链的终点？ 
 
 由于 Object 是原型链顶端的构造函数，所以原型链终点 Object.prototype.__proto__， 而 Object.prototype.__proto__=== null // true，所以，原型链 的终点是 null。
@@ -3549,6 +3599,16 @@ Object.create(null) 会创建一个不从 Object.prototype 继承的对象，这
 在ESLint的[规则 built-in rule](https://eslint.org/docs/rules/no-prototype-builtins) 中，是禁止直接使用 Object.prototypes 内置函数
 
 综上，使用Object.hasOwn更加优秀
+
+
+
+此外还有一种属性检测方式
+
+- **in**
+
+如果指定的属性在指定的对象或其原型链中，则 **`in`** **运算符**返回 `true`。
+
+
 
 ## Map
 

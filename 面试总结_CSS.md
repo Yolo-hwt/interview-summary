@@ -1,3 +1,11 @@
+## css规范书写顺序
+
+- 位置属性(position, top, right, z-index, display, float等)
+- 大小(width, height, padding, margin)
+- 文本(font, line-height, letter-spacing, color- text-align等)
+- 背景(background, border等)
+- 其他(animation, transition等)
+
 ##  标准盒模型和IE盒模型
 
 > 我们目前所学习的知识中，以标准盒子模型为准。
@@ -853,6 +861,951 @@ fixed
 static
 
 sticky
+
+## margin/padding
+
+**margin的几个方向**
+
+- `margin-top` 元素自身会向上移动，同时会影响下方的元素会向上移动；
+- `margin-botom` 元素自身不会位移，但是会减少自身供css读取的高度，从而影响下方的元素会向上移动。
+- `margin-left` 元素自身会向左移动，同时会影响其它元素；
+- `margin-right` 元素自身不会位移，但是会减少自身供css读取的宽度，从而影响右侧的元素会向左移动；
+
+总结：
+
+margin-top与left会使得元素自身移动，同时影响其他元素
+
+margin-bottom和right不会使得自身移动，但是会通过减少自身供给css读取的相应值，以此来影响其他元素
+
+## margin塌陷与合并
+
+- **塌陷**
+
+问题引入：设置`marigin`让父元素相对左边及顶部各距离`100px`,子元素相对于父元素左边和顶部各`50px`
+
+```css
+div.father{
+    width: 200px;
+    height: 200px;
+    background-color: rgb(219, 68, 101);
+    margin-left: 100px;
+    margin-top: 100px;
+}
+div.father div.son{
+    width: 100px;
+    height: 100px;
+    background-color: rgb(56, 248, 207);
+    margin-left: 50px;
+    margin-top: 50px;
+}
+```
+
+得到结果为
+
+![image-20221006215320205](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/image-20221006215320205.png)
+
+显而易见垂直方向margin出现了塌陷
+
+这里可以得知：**父子嵌套的元素垂直方向的`margin`取最大值。**
+
+解决：BFC
+
+触发块级上下文后`CSS`将`HTML`的每一个元素都当成一个盒子，而且它进一步的认为每一个盒子里面都有一套正常的语法规则或者叫渲染规则
+
+为上代码父级class添加：overflow:hidden
+
+![image-20221006220310181](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/image-20221006220310181.png)
+
+- **合并**
+
+**！！！注意：**只有普通文档流中块框的垂直外边距才会发生外边距合并。行内框、浮动框或绝对定位之间的外边距不会合并。
+
+问题引入：两个兄弟块元素，一个设置下外边距100px，一个设置上外边距100px，让两个元素相距200px
+
+```css
+.one{
+    background-color: pink;
+    height: 20px;
+    margin-bottom: 10px;
+}
+.two{
+    background-color: purple;
+    height: 20px;
+    margin-top: 100px;
+}
+```
+
+![image-20221006220703934](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/image-20221006220703934.png)
+
+我们希望得到110px的间距，却只有100px，则出现了外边距合并
+
+- 外边距合并显示较大值
+
+解决：
+
+这实际上是浏览器的一个bug，那么开发过程中遇到这种情况
+
+1.提前计算好需要的边距大小，只设置一边的边距（如只设置margin-bottom，不设置margin-top）
+
+## CSS布局
+
+### 水平垂直居中
+
+- **行内元素**
+
+水平：text-aligin:center
+
+垂直：line-height=height（适合纯文字类型）
+
+
+
+- **块级元素**
+
+**元素定宽高**
+
+**1.子绝父相，top+left+margin**
+
+```css
+ .father {
+      position: relative;
+   }
+ .son {
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     margin-left: -子级width的一半
+     margin-top: -子级height的一半
+ }
+```
+
+**2.子绝父相+margin auto**
+
+```css
+ .father {
+     position: relative;
+ }
+ .son {
+     position: absolute; 
+     margin: auto; 
+     /*水平居中*/
+     left: 0;
+     right: 0;
+     /*垂直居中*/
+     top: 0;
+     bottom: 0;
+ }
+```
+
+**auto定位原理**
+
+利用元素的**流行特征**——当一个绝对定位元素，其**四个定位方向同时设置具体数值**时，流行特征就会发生。
+
+流行特征好处在于，**元素可自动填充父级元素的可用尺寸**。
+
+我们通过给元素设置`left、right、top、bottom`的值，然后将水平/垂直方向的` margin` 均设为 `auto`，这样一来，`auto `就会自动平分父元素的剩余空间了
+
+
+
+**元素宽高不定**
+
+**1.子绝父相+transfrom**
+
+```css
+ .father {
+      position: relative;
+   }
+ .son {
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+ }
+```
+
+**2.flex**
+
+- 水平居中：父级：display:flex+justify-content:center
+- 垂直居中：父级：display:flex+align-items:center
+
+```
+.father {
+   display: flex;
+   /*水平居中*/
+   justify-content: center;
+   /*垂直居中*/
+   align-items: center;
+}
+```
+
+**3.table**
+
+- **水平居中**
+
+```css
+.father{
+    text-align: center;
+}
+.son {
+    display: inline-block;
+}
+```
+
+- **垂直居中**
+
+```css
+.father{
+    display: table-cell;
+    vertical-align: middle;
+}
+```
+
+### 单列布局
+
+1. 普通布局
+
+头部、内容、底部
+
+<img src="%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/b0c141a9004041b78304a4c5f0636c45tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp" alt="普通布局.png" style="zoom: 50%;" />
+
+```html
+<head>
+<meta charset="utf-8">
+<title>单列布局-普通布局</title>
+<style>
+    .header{
+       margin:0 auto; 
+       max-width: 960px;
+       height:100px;
+       background-color:pink;
+    }
+    .container{
+       margin: 0 auto;
+       max-width: 960px;
+       height: 500px;
+       background-color: aquamarine;
+    }
+    .footer{
+       margin: 0 auto;
+       max-width: 960px;
+       height: 100px;
+       background-color:skyblue;
+    }
+</style>
+</head>
+<body>
+    <div class="header"></div>
+    <div class="content"></div>
+    <div class="footer"></div>
+</body>
+```
+
+内容区域（版心）为960px，采用margin:0 auto实现水平居中
+
+<img src="%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/452692d0c63c4c11a5ffd5750da9cf17tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp" alt="内容居中.png" style="zoom: 50%;" />
+
+```html
+<head>
+<meta charset="utf-8">
+<title>普通布局-内容居中</title>
+<style>
+    .header{
+        margin:0 auto;
+        height:100px;
+        background-color:pink;
+    }
+    .content{
+        margin: 0 auto;
+        height: 500px;
+        width:960px;
+        background-color: aquamarine;
+    }
+    .footer{
+        margin: 0 auto;
+        height: 100px;
+        background-color: skyblue;
+    }
+</style>
+</head>
+<body>   
+    <div class="header"></div>
+    <div class="center">
+         <div class="content"></div>
+    </div>
+    <div class="footer"></div>
+</body>
+```
+
+### 两栏布局
+
+所谓两栏布局是指：左侧定宽，右侧自适应。
+
+实现思路：
+ 普通流体BFC后（float:left）和浮动元素不会产生交集，顺着浮动元素形成自己的封闭上下文。
+
+**1.float定宽**
+
+![image.png](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/1d2d59e150d5460ca998c1bee1f60a1dtplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
+
+```html
+<head>
+<meta charset="utf-8">
+<title>两栏布局-float</title>
+<style>
+    .left {
+        width: 300px;
+        background-color: pink;
+        float: left;
+        height:500px;
+    }
+    .right {
+        width:100%;
+        background-color: aquamarine;
+        height:500px;  
+    }
+</style>
+</head>
+<body>      
+     <div class="warp">
+         <div class="left">定宽</div>
+         <div class="right">自适应</div>
+    </div>
+</body>
+复制代码
+```
+
+
+
+**2.flex**
+
+实现思路：
+ 父元素开启弹性空间，左盒子设置固定宽度，右盒子flex：1
+
+![image.png](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/a99b85db5eba4769beb537ccab4878cbtplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
+
+```html
+<head>
+<meta charset="utf-8">
+<title>两栏布局-flex</title>
+<style>
+   .warp{
+       display:flex;
+  }
+  .left {
+       width: 300px;
+       background-color: pink;
+       height:500px;
+  }
+ .right {
+       background-color: aquamarine;
+       height:500px;  
+       flex:1
+}
+</style>
+</head>
+<body>      
+     <div class="warp">
+         <div class="left">定宽</div>
+         <div class="right">自适应</div>
+    </div>
+</body>
+```
+
+
+
+### 三栏布局
+
+- 左右固定，中间自适应
+- **中间栏放在文档流前面，保证优先加载**。
+
+![image.png](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/246a28ec48fb4701b4ad470a910e8c6atplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
+
+实现方案有三种：
+
+**flex布局、圣杯布局、双飞翼布局**
+
+！！！圣杯起源于a list part的一篇文章，双飞翼起源于淘宝UED，灵感来源于页面渲染。
+
+
+
+**1.flex实现**
+
+- 将中间盒子放置html最开始，保证优先加载
+- 使用flex order属性决定三个盒子顺序，左，中，右
+- 左盒子和右盒子固定宽度，中间盒子flex:1
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>flex布局</title>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    .box{
+        min-width: 800px;
+        height: 600px;
+        background: gray;
+        display: flex;
+    }
+    .left{
+        width:200px;
+        height: 600px;
+        background: pink;
+        order:-1
+    }
+    .center{
+        height: 600px;
+        background: aquamarine;
+        width:100%;
+        flex:1
+        order:1
+    }
+    .right{
+        width:200px;
+        height: 600px;
+        background: skyblue;
+        order:2
+    }
+</style>
+</head>
+<body>
+<div class="box">
+    <div class="center">中哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈中</div>
+    <div class="left">左</div>
+    <div class="right">右</div>	
+</div>
+</body>
+</html>
+```
+
+**`order`** 属性
+
+规定了弹性容器中的可伸缩项目在**布局时的顺序**。
+
+- 元素按照 `order` 属性的值的**增序进行布局**。
+- 拥有相同 `order` 属性值的元素按照它们在源代码中出现的顺序进行布局。
+
+
+
+**2.圣杯布局实现**（margin-left+relative）
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    header,
+    footer {
+        height: 100px;
+        background-color: bisque;
+    }
+
+    .wrap {
+        padding: 0 200px;
+        overflow: hidden;
+    }
+
+    .wrap>div {
+        height: 500px;
+        float: left;
+    }
+
+    .content {
+        width: 100%;
+        background-color: aquamarine;
+    }
+
+    .left {
+        position: relative;
+        width: 200px;
+        left: -200px;
+        margin-left: -100%;
+        background-color: palevioletred;
+    }
+
+    .right {
+        position: relative;
+        width: 200px;
+        left: 200px;
+        margin-left: -200px;
+        background-color: skyblue;
+    }
+</style>
+
+<body>
+    <header>header</header>
+    <div class="wrap">
+        <div class="content">content</div>
+        <div class="left">left</div>
+        <div class="right">right</div>
+    </div>
+    <footer>footer</footer>
+</body>
+
+</html>
+```
+
+- header和footer定高，warp设置padding预留两边布局位置
+- content设置宽度100%，left,content,right设置float:left
+
+![image-20221007173630506](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/image-20221007173630506.png)
+
+然后目的就是将left和right移动到上面padding预留出来的空白区域
+
+使用`margin-left`
+
+**分析：**
+
+content设置了宽度100%，那么left和right就被挤到下一行了
+
+使用margin-left将他们移动道上一行
+
+然后再利用relative定位，基于当前位置，利用left定位微调
+
+**margin-left值百分比，准确的应该是指**：
+
+（子盒子的左边框相对于左侧兄弟盒子的右边框的距离）/左边最近兄弟元素宽度
+
+- left
+
+```css
+//移到上一行
+margin-left: -100%;
+//相对当前位置向左调整
+position: relative;
+left: -200px;    
+```
+
+- right
+
+```css
+//移到上一行
+margin-left: -200px;
+//相对当前位置向左调整
+position: relative;
+left: 200px;    
+```
+
+![image-20221007180300513](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/image-20221007180300513.png)
+
+
+
+**3.双飞翼布局实现**（margin-left+margin-right）
+
+基础部分类似圣杯布局，区别在于中间部分遮罩的处理
+
+- 圣杯：左右设置relative定位+left位移
+- 双飞翼：中间部分为两个嵌套的div，内容部分放在内层，并使用margin-left/right压缩自身，将两侧被遮挡部分完整显示
+
+具体步骤：
+
+1.三个盒子设置浮动
+
+2.左盒子走负margin-left:100%，右盒子走负自身的宽度
+
+3.调整中间盒子margin
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>双飞翼</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    .box {
+        min-width: 800px;
+        height: 600px;
+    }
+
+    .left {
+        float: left;
+        margin-left: -100%;
+        width: 200px;
+        height: 600px;
+        background: pink;
+    }
+
+    .right {
+        float: left;
+        margin-left: -200px;
+        width: 200px;
+        height: 600px;
+        background-color: aquamarine;
+    }
+
+    .center {
+        float: left;
+        width: 100%;
+        height: 600px;
+        background: skyblue;
+    }
+
+    .content {
+        margin-left: 200px;
+        margin-right: 200px;
+        background-color: yellowgreen;
+    }
+</style>
+
+<body>
+    <div class="box">
+        <div class="center">
+            <div class="content">
+                中哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈中
+            </div>
+        </div>
+        <div class="left">左</div>
+        <div class="right">右</div>
+    </div>
+</body>
+
+</html>
+```
+
+### 等高布局
+
+等高布局是指**子元素**在**父元素中高度相等**的布局方式。
+
+**1.正值内边距+负值外边距**
+
+padding设置一个超大值，将内容撑开，然后由margin-bottom设置一个负的超大值从末尾将其往上推，padding和margin相互抵消，达到两元素等高
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>等高布局-正值内边距+负值外边距</title>
+<style type="text/css">
+      *{
+            margin:0;
+            padding:0;
+     }
+     .left,
+     .right {
+            width:50%;
+            float:left;
+            text-align:center;
+            background-color:aquamarine;
+            /* 设置正值内边距会把背景颜色拉伸 */
+            padding-bottom:9999px;
+            /* 设置负值外边距把边框往里推 */
+            margin-bottom:-9999px;
+     }
+     .right{
+             background-color: pink;	 
+     }
+     .container {
+            width:1200px;
+            margin:0 auto;
+            /* 开启BFC限制内容 */
+            overflow:hidden;
+     }
+</style>
+</head>
+<body>
+ <div class="container">
+     <div class="left">111111111111</div>
+     <div class="right">
+        333333333333333333333333333333333333333333333333
+        333333333333333333333333333333333333333333333333
+        333333333333333333333333333333333333333333333333
+     </div>
+ </div>
+</body>
+</html>
+```
+
+
+
+**2.table**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>等高布局-table布局</title>
+<style type="text/css">   
+ *{
+    margin:0;
+    padding:0;
+ }
+ .center,
+ .left,
+ .right {
+    width:33.3%;
+    text-align:center;
+    display: table-cell;
+    background-color:aquamarine;
+ }
+.container {
+    display:table;
+    width:1200px;
+    margin:0 auto;
+ }    
+</style>
+</head>
+<body>
+ <div class="container">
+      <div class="left">111111111111</div>
+      <div class="center">22222222222222222222222222</div>
+      <div class="right">
+        333333333333333333333333333333333333333333333333
+        333333333333333333333333333333333333333333333333
+        333333333333333333333333333333333333333333333333
+     </div>
+  </div>
+</body>
+</html>
+```
+
+
+
+**3.flex**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>等高布局-flex布局</title>
+<style type="text/css">   
+ *{
+    margin:0;
+    padding:0;
+ }
+ .center,
+ .left,
+ .right {
+    text-align:center;
+    background-color:aquamarine;
+    flex:1
+ }
+ .container {
+    display:flex;
+    /* flex-direction: row; */
+    width:1200px;
+    margin:0 auto;
+ }
+</style>
+</head>
+<body>
+ <div class="container">
+    <div class="left">111111111111</div>
+    <div class="center">22222222222222222222222222</div>
+    <div class="right">
+	 333333333333333333333333333333333333333333333333
+	 333333333333333333333333333333333333333333333333
+	 333333333333333333333333333333333333333333333333
+ </div>
+</div>
+</body>
+</html>
+```
+
+如果对center主版有优先加载需求可以添加order顺序标识，来实现
+
+```css
+.left {
+    order: 1
+}
+
+.center {
+    order: 2;
+}
+
+.right {
+    order: 3;
+}
+```
+
+
+
+# **4.grid布局（待学习）**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>grid布局</title>
+<style>   
+ *{
+    margin:0;
+    padding:0;
+ }
+ .center,
+ .left,
+ .right {
+    text-align:center;
+    background-color:aquamarine;
+    flex:1
+}
+ .container {
+    display:grid;
+    grid-auto-flow: column;
+    width:1200px;
+    margin:0 auto;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="left">111111111111</div>
+    <div class="center">22222222222222222222222222</div>
+    <div class="right">
+	 333333333333333333333333333333333333333333333333
+	 333333333333333333333333333333333333333333333333
+	 333333333333333333333333333333333333333333333333
+ </div>
+</div>
+</body>
+</html>
+```
+
+
+
+### 粘带布局
+
+当main的高度足够长的时候，footer会跟在其后面。 当main元素比较短的时候(比如小于屏幕宽度)，footer元素能够粘带在屏幕底部。
+
+![20210429160149788.jpg](%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93_CSS.assets/78a4d9d7fc0c426c99bc84046281fdc8tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.webp)
+
+**1.负margin-bottom/top**
+
+通过观察结构可以发现，warp包裹着main，然后footer紧随其后
+
+warp设置min-height:100%是灵魂，结合margin-bottom:负的footer高度（元素自身不变，改变的是css读取值）可以让footer粘在底部
+
+由于main部分内容在warp内部，在其内容高度小于100%时候也就不会影响到footer的展示
+
+main内容高度大于100%后，warp设置的是min-height（非常灵魂），warp就被撑开，footer也跟着被挤下去
+
+```html
+<html>
+<head>
+<meta charset="UTF-8">
+<title>粘带布局-负margin-bottom</title>
+ <style>
+/* 用一个元素将footer以外的内容包起来,设置负的margin-bottom,让他正好等于footer的高度 */
+html, body {
+     margin: 0;
+     padding:0;
+     text-align:center;
+}
+#wrap{
+      min-height:100%;
+      background-color: pink;	
+      margin-bottom: -30px;
+}
+#footer,#main{
+      height: 30px;
+} 
+#footer{
+     background-color: aquamarine;
+}
+</style>
+</head>
+<body>
+    <div id="wrap">
+        <div id="main">main</div>
+    </div>
+    <div id="footer">footer</div>
+</body>
+</html>
+```
+
+同理可以在footer上使用mrgin-top达到上述相同效果
+
+```css
+#footer{
+        width: 100%;
+        height: 30px;
+        background-color: aquamarine;
+        margin-top: -30px;
+    } 
+```
+
+
+
+**2.flex**
+
+flex太强大了
+
+这里使用warp包裹container和footer（container位于footer上方）,container内部嵌套main
+
+warp设置flex布局，并调整方向为column
+
+footer定高，container设置flex:1
+
+**！！！细节注意**
+
+上面的margin方法实际上存在一个问题底部的footer覆盖了与之相同高度的warp，而flex是对于剩余空间的分配，解决了这个问题
+
+```html
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>粘带布局-flex</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        #wrap {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+        }
+
+        .main {
+            height: 300px;
+            background-color: pink;
+        }
+
+        #footer {
+            background-color: aquamarine;
+            height: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrap">
+        <div class="container">
+            <div class="main">
+                main
+            </div>
+        </div>
+        <div id="footer">footer</div>
+    </div>
+</body>
+
+</html>
+```
+
+
 
 ## CSS3新特性
 

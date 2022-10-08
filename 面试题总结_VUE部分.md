@@ -1801,7 +1801,7 @@ function sameVnode(oldVnode, newVnode) {
 
 
 
-所以我们在只需在父组件中为子组件绑定`@hook:mounted`，也就是执行了`vm.$emit(hook:mounted)`
+所以我们在只需在父组件中为子组件绑定`@hook:mounted`，也就是执行了`vm.$on(hook:mounted)`
 
 那么在vue2内部执行生命周期钩子的时候就会自动调用`vm.$emit('hook:mounted')`
 
