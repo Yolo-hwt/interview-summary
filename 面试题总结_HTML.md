@@ -317,7 +317,8 @@ source.onmessage = function(event) {
   span|a|一些修饰文字的标签
   ```
   
-  - **无法设置宽高**，**内外边距仅在左右方向有效**，宽度由内容长度决定，高度由元素内部字体大小控制，也可以设置行高
+  - **无法设置宽高**，**内外边距仅在左右方向有效**，上下方向不影响内容位置，但是会扩大元素范围
+  - 宽度由内容长度决定，高度由元素内部字体大小控制，也可以设置行高
   - **行内元素中不能放块级元素，a 链接里面不能再放链接**
   - 相邻的行内元素会排列在同一行里，直到一行排不下才会自动换行
 
@@ -439,5 +440,27 @@ Web语义化是指使用恰当语义的html标签、class类名等内容，让�
 
 ```
 <meta http-equiv="Refresh" content="1000" url="https://baidu.com/">
+```
+
+## base文档根 URL 元素
+
+**HTML <base> 元素** 指定用于一个文档中包含的所有相对 URL 的根 URL。
+
+！！！一份中只能有一个 <base> 元素。如果指定了多个 `<base>` 元素，只会使用第一个 `href` 和 `target` 值，其余都会被忽略。
+
+一个文档的基本 URL，可以通过使用 [`document.baseURI` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/Node/baseURI) 的 JS 脚本查询。
+
+- document.baseURI为只读属性
+
+- 如果文档不包含 `<base>` 元素，`baseURI` 默认为 `document.location.href`。
+
+如果base标签指定了`href`或者`target`属性，则此base元素必须在其他具备url属性的元素之前
+
+```html
+<base href="http://www.example.com/" target="_blank">
+<link href="main.css" rel="stylesheet">
+
+//解析出来的连接为
+http://www.example.com/main.css
 ```
 

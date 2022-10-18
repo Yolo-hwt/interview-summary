@@ -1805,10 +1805,6 @@ function sameVnode(oldVnode, newVnode) {
 
 那么在vue2内部执行生命周期钩子的时候就会自动调用`vm.$emit('hook:mounted')`
 
-
-
-
-
 ## vue3.0有什么更新
 
 
@@ -1818,3 +1814,7 @@ function sameVnode(oldVnode, newVnode) {
  
 
 ## Vue和React的区别
+
+
+
+## Vue自定义指令

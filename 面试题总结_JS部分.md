@@ -194,7 +194,7 @@ undefined和null没有toString()和valueOf()
 
 **类型不同**
 
-如果两个值类型不同，他们可能相等。根据下面规则进行类型转换再比较：
+如果两个值类型不同，他们可能相等。根据下面规则进行**类型转换**再比较：
 
 只处理下面几种情况
 
@@ -290,8 +290,15 @@ NaN===NaN	//false
 而Object.is可以区别
 
 ```js
-Object.is(-1,0)		//false
+Object.is(-0,0)		//false
 Object.is(NaN,NaN)	//true
+```
+
+此外NaN的判别还可以用isNaN来判断
+
+```js
+isNaN(NaN)		//NaN
+Number.isNaN(NaN)//NaN
 ```
 
 
@@ -702,8 +709,6 @@ const关键字保证变量指向的那个内存地址不能被修改
 
 ## new创建一个对象实现步骤
 
-
-
 1.创建对象（堆分配内存创建空对象，栈存放指向此块内存对象的指针）
 
 2.构造函数的作用域赋给新对象（即对象的下划线proto属性指向构造函数的prototype）
@@ -845,7 +850,7 @@ Proxy 无需一层层递归为每个属 性添加代理，一次即可完成以�
 
 性能上更好，并且原本的实现 有一些数据更新不能监听到，
 
-- 但是 Proxy 可以完美监听到任何方式 的数据改变，唯一缺陷就是浏览器的兼容性不好
+- 但是 Proxy 可以完美监听到任何方式 的数据改变，唯一缺陷就是**浏览器的兼容性不好**
 
 ## JavaScript 脚本延迟加载的方式有哪些
 
@@ -875,7 +880,7 @@ js 延 迟加载有助于提高页面加载速度
 <script type = 'text/javascript' src = 'tools.js' async></script>
 ```
 
-给 js 脚本添加 async 属性，这个属性会使脚本异步 加载，不会阻塞页面的解析过程
+给 js 脚本添加 async 属性，这个属性会使**脚本异步加载**，不会阻塞页面的解析过程
 
 当脚本加载完成后立即执行 js 脚本，**这个时候如果文档没有解析完成的话同样会阻塞。**
 
@@ -2314,37 +2319,15 @@ var obj = {a: 1, b: {
 
 ## 模块化
 
-在有 Babel 的情况下，我们可以直接使用 ES6 的模块化
+- **commonJS**
 
-```js
-// file a.js
-export function a() {}
-export function b() {}
-// file b.js
-export default function() {}
+Node 中的模块规范，通过 `require` 及 `exports` 进行导入导出
 
-import {a, b} from './a.js'
-import XXX from './b.js'
-```
+ `cjs` 模块可以运行在 node 环境及 webpack 环境下的，但不**能在浏览器中直接使用**，浏览器中使用就需要用到 `Browserify` 解析了。
 
-- **CommonJS**
+**！！！运行时加载，模块输出一个值的拷贝**
 
-`CommonJs` 是 Node 独有的规范，浏览器中使用就需要用到 `Browserify` 解析了。
-
-```js
-// a.js
-module.exports = {
-    a: 1
-}
-// or
-exports.a = 1
-
-// b.js
-var module = require('./a.js')
-module.a // -> log 1
-```
-
-在上述代码中，`module.exports` 和 `exports` 很容易混淆，让我们来看看大致内部实现
+`module.exports` 和 `exports` 很容易混淆，让我们来看看大致内部实现
 
 ```js
 var module = require('./a.js')
@@ -2370,12 +2353,73 @@ var load = function (module) {
 
 再来说说 `module.exports` 和 `exports`，用法其实是相似的，但是不能对 `exports` 直接赋值，不会有任何效果。
 
-对于 `CommonJS` 和 ES6 中的模块化的两者区别是：
+对于 `CommonJS` 和` ES6 `中的模块化的两者区别是：
 
 - 前者支持动态导入，也就是 `require(${path}/xx.js)`，后者目前不支持，但是已有提案
-- 前者是同步导入，因为用于服务端，文件都在本地，同步导入即使卡住主线程影响也不大。而后者是异步导入，因为用于浏览器，需要下载文件，如果也采用同步导入会对渲染有很大影响
-- 前者在导出时都是值拷贝，就算导出的值变了，导入的值也不会改变，所以如果想更新值，必须重新导入一次。但是后者采用实时绑定的方式，导入导出的值都指向同一个内存地址，所以导入值会跟随导出值变化
+- **前者是同步导入**，因为用于服务端，文件都在本地，同步导入即使卡住主线程影响也不大。而**后者是异步导入**，因为用于浏览器，需要下载文件，如果也采用同步导入会对渲染有很大影响
+- **前者在导出时都是值拷贝**，就算导出的值变了，导入的值也不会改变，所以如果想更新值，必须重新导入一次。但是**后者采用实时绑定的方式**，导入导出的值都指向同一个内存地址，所以导入值会跟随导出值变化
 - 后者会编译成 `require/exports` 来执行的
+
+
+
+- **esm**
+
+对于 ESMAScript 的模块话规范，正因是语言层规范，**因此在 Node 及 浏览器中均会支持**
+
+使用 `import/export` 进行模块导入导出.
+
+在有 Babel 的情况下，我们可以直接使用 ES6 的模块化
+
+```js
+// file a.js
+export function a() {}
+export function b() {}
+// file b.js
+export default function() {}
+
+import {a, b} from './a.js'
+import XXX from './b.js'
+```
+
+是未来的趋势，目前一些 CDN 厂商，前端构建工具均致力于 cjs 模块向 esm 的转化，比如 `skypack`、 `snowpack`、`vite` 等。
+
+模块引入顺序是先读取内部import的模块，然后再解析本模块
+
+```js
+//sum.js
+console.log('loading sum.js');
+export const sum = function (...args) {
+    return args.reduce((pre, cur) => pre + cur, 0)
+}
+
+//main.js
+console.log('loading main.js');
+import { sum } from './js/sum';//import被优先解析执行
+console.log(sum(1,2,3));
+
+//执行完main.js后输出为
+loading sum.js
+loading main.js
+6
+```
+
+
+
+**！！！静态导入，可以在编译期进行Tree Shaking，输出值的引用**
+
+**Tree Shaking**
+
+`Tree Shaking` 指基于 ES Module 进行静态分析，通过 AST 将用不到的函数进行移除，从而减小打包体积。
+
+**core-js**
+
+core-js是关于 ES 标准最出名的 `polyfill`，polyfill 意指当浏览器不支持某一最新 API 时，它将帮你实现
+
+
+
+- **umd**
+
+兼容 `cjs` 与 `amd` 的模块，既可以在 node/webpack 环境中被 `require` 引用，也可以在浏览器中直接用 CDN 被 `script.src` 引入。
 
 
 
@@ -3576,7 +3620,52 @@ doctype标签: document.doctype
 
 ## js数据四舍五入
 
-Math.
+- **toFixed**
+
+四舍六入五考虑
+
+保留两位，1.5561，第三位为6，四舍六入，入
+
+```js
+console.log(1.5561.toFixed(2));//1.56
+```
+
+四舍
+
+```
+console.log(1.5541.toFixed(2));//1.55
+```
+
+1. 五后非零就进一
+
+1.5551保留两位，第三位为5，5后面为1，非零则进一
+
+```
+console.log(1.5551.toFixed(2));//1.56
+```
+
+2. 五后为零舍去
+
+```
+console.log(1.5550.toFixed(2));//1.55
+```
+
+
+
+- **Math.round**
+
+数据小数部分大于等于0.5则为Math.ceil
+
+小于0.5则为Math.floor
+
+```js
+x = Math.round(20.49);   //20
+x = Math.round(20.5);    //21
+x = Math.round(-20.5);   //-20
+x = Math.round(-20.51);  //-21
+```
+
+
 
 ## Object.hasOwn或hasOwnProperty？
 
@@ -3771,41 +3860,7 @@ WeakMap的方法
 
   - 当节点从DOM树被删除后，垃圾回收机制就可以立即释放其内存（如果没有其他地方引用），但是如果使用Map的话，即使节点删除后，由于映射中还保存着按钮的引用，所以DOM节点依旧会留在内存
 
-## 模块化
-
-- **commonJS**
-
-Node 中的模块规范，通过 `require` 及 `exports` 进行导入导出
-
- `cjs` 模块可以运行在 node 环境及 webpack 环境下的，但不能在浏览器中*直接*使用
-
-**！！！运行时加载，模块输出一个值的拷贝**
-
-
-
-- **esm**
-
-对于 ESMAScript 的模块话规范，正因是语言层规范，**因此在 Node 及 浏览器中均会支持**
-
-使用 `import/export` 进行模块导入导出.
-
-是未来的趋势，目前一些 CDN 厂商，前端构建工具均致力于 cjs 模块向 esm 的转化，比如 `skypack`、 `snowpack`、`vite` 等。
-
-**！！！静态导入，可以在编译期进行Tree Shaking，输出值的引用**
-
-**Tree Shaking**
-
-`Tree Shaking` 指基于 ES Module 进行静态分析，通过 AST 将用不到的函数进行移除，从而减小打包体积。
-
-**core-js**
-
-core-js是关于 ES 标准最出名的 `polyfill`，polyfill 意指当浏览器不支持某一最新 API 时，它将帮你实现
-
-
-
-- **umd**
-
-兼容 `cjs` 与 `amd` 的模块，既可以在 node/webpack 环境中被 `require` 引用，也可以在浏览器中直接用 CDN 被 `script.src` 引入。
+## intersectionObserve
 
 
 

@@ -36,6 +36,8 @@ CSS盒模型和IE盒模型的区别：
 
 ## 清除浮动
 
+首先要明白，浮动和绝对定位不是一样的，绝对定位导致的父级元素塌陷，只能使用给父级元素添加宽高实现
+
 示例代码
 
 ```html
@@ -479,10 +481,6 @@ CSS匹配不是从左到右进行查找，而是**从右到左进行查找**。
 
 所以选择器最好写的简洁一点。
 
-## link和import引入区别
-
-
-
 ## CSS选择器
 
 ```ini
@@ -856,7 +854,9 @@ absolute
 
 fixed
 
-使用 `fixed` 进行布局的元素，在一般情况下会相对于屏幕视窗来进行定位。但是如果父元素的 **`transform`, `perspective` 或 `filter` 属性不为 `none`** 时，position为`fixed` 的元素就会相对于父元素来进行定位。
+使用 `fixed` 进行布局的元素，在一般情况下会相对于屏幕视窗来进行定位。
+
+但是如果父元素的 **`transform`, `perspective` 或 `filter` 属性不为 `none`** 时，position为`fixed` 的元素就会**相对于父元素来进行定位。**
 
 static
 
@@ -864,12 +864,47 @@ sticky
 
 ## margin/padding
 
-**margin的几个方向**
+### **padding**
 
-- `margin-top` 元素自身会向上移动，同时会影响下方的元素会向上移动；
-- `margin-botom` 元素自身不会位移，但是会减少自身供css读取的高度，从而影响下方的元素会向上移动。
-- `margin-left` 元素自身会向左移动，同时会影响其它元素；
-- `margin-right` 元素自身不会位移，但是会减少自身供css读取的宽度，从而影响右侧的元素会向左移动；
+**注意点：**
+
+1. 块级元素设置定宽，box-sizing=border-box（怪异盒模型），如果两边padding足够大，则会使的宽度无效，内容表现为首选最小宽度
+
+```
+ .box{
+     width:80px;
+     padding:20px 60px;
+     box-sizing:border-box
+ }
+ 这种情况下width会无效，最终的宽度为60*2=120px
+```
+
+2. 内联元素padding在水平方向上生效，但在垂直方向上不影响视觉表现（内容部分的位置不变），而是影响布局的层叠效果
+
+- 可以利用垂直方向不影响视觉的特点增大行内元素的点击区域
+
+
+
+**padding的百分比值**
+
+- padding属性是不支持负数的
+
+- padding的百分比值无论是水平方向还是垂直方向，都是**基于元素的宽度计算的**(块状元素与内联元素一样)
+
+- 默认的宽度和高度有差异：内联元素的垂直padding会让“幽灵空白节点”显现，通过设置font-size：0,可以消除幽灵空白节点的影响
+
+- 内联元素的padding会算作内联行框盒子的一部分，所以padding如果超出父级设置的宽度会自动换行
+
+
+
+
+
+### **margin**
+
+- `margin-top` 元素自身会向上移动，同时会影响下方的元素会向上移动；（百分比相对于父元素宽度）
+- `margin-botom` 元素自身不会位移，但是会减少自身供css读取的高度，从而影响下方的元素会向上移动。（百分比始终与包含该元素的**容器宽度**有关）
+- `margin-left` 元素自身会向左移动，同时会影响其它元素；（百分比相对于最近的块容器的宽度 *width* ）
+- `margin-right` 元素自身不会位移，但是会减少自身供css读取的宽度，从而影响右侧的元素会向左移动；（相对于其最近的父级容器的宽度）
 
 总结：
 
@@ -877,11 +912,13 @@ margin-top与left会使得元素自身移动，同时影响其他元素
 
 margin-bottom和right不会使得自身移动，但是会通过减少自身供给css读取的相应值，以此来影响其他元素
 
+
+
 ## margin塌陷与合并
 
 - **塌陷**
 
-问题引入：设置`marigin`让父元素相对左边及顶部各距离`100px`,子元素相对于父元素左边和顶部各`50px`
+问题引入：设置`margin`让父元素相对左边及顶部各距离`100px`,子元素相对于父元素左边和顶部各`50px`
 
 ```css
 div.father{
@@ -908,7 +945,7 @@ div.father div.son{
 
 这里可以得知：**父子嵌套的元素垂直方向的`margin`取最大值。**
 
-解决：BFC
+解决：BFC 或 父级添加border
 
 触发块级上下文后`CSS`将`HTML`的每一个元素都当成一个盒子，而且它进一步的认为每一个盒子里面都有一套正常的语法规则或者叫渲染规则
 
@@ -1688,11 +1725,13 @@ padding设置一个超大值，将内容撑开，然后由margin-bottom设置一
 
 通过观察结构可以发现，warp包裹着main，然后footer紧随其后
 
-warp设置min-height:100%是灵魂，结合margin-bottom:负的footer高度（元素自身不变，改变的是css读取值）可以让footer粘在底部
+warp设置min-height:100%（必要时候还需先设置body:100%）是灵魂，结合margin-bottom:负的footer高度（元素自身不变，改变的是css读取值）可以让footer粘在底部
 
 由于main部分内容在warp内部，在其内容高度小于100%时候也就不会影响到footer的展示
 
 main内容高度大于100%后，warp设置的是min-height（非常灵魂），warp就被撑开，footer也跟着被挤下去
+
+**不设置负margin的好处是可以让各个部分不重叠，但初始时候直接会带来滚动条**
 
 ```html
 <html>
@@ -1804,6 +1843,25 @@ footer定高，container设置flex:1
 
 </html>
 ```
+
+## link和import引入区别
+
+两者都是外部引用CSS的方式，它们的区别如下：
+
+- link是XHTML标签，除了加载CSS外，还可以定义RSS等其他事务；@import属于CSS范畴，只能加载CSS。
+- link引用CSS时，在页面载入时同时加载；@import需要页面网页完全载入以后加载。
+- link是XHTML标签，无兼容问题；@import是在CSS2.1提出的，低版本的浏览器不支持。
+- link支持使用Javascript控制DOM去改变样式；而@import不支持。
+
+## transfrom
+
+
+
+## transition
+
+
+
+## CSS动画
 
 
 
