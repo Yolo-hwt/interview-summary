@@ -136,8 +136,6 @@ test.constructor===Fn	//false
 parseFloat((0.1 + 0.2).toFixed(10))
 ```
 
-
-
 ## null 和 undefined 区别
 
 - 同
